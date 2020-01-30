@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="UTF-8">
+  <title>Map</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""></script>
+  </script>
+
+</head>
+
+<body>
+
+  <style>
+    body,
+    html {
+      height: 100%;
+    }
+
+    #mapid {
+      height: 100%;
+    }
+  </style>
+
+
+  <div id="mapid"></div>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script>
+
+
+$(document).ready(function () {
+
+/**
+//  console.log("here")
+const geo = navigator.geolocation;
+geo.wifi.uri = 'https://location.services.mozilla.com/v1/geolocate?key=test'
+
+geo.getCurrentPosition(success, failure);
+
+function success(position) {
+    lat = position.coords.latitude;
+    lng = position.coords.longitude;
+    console.log(lat + ',' + lng);
+    //mapView.setCenter(ol.proj.fromLonLat([lng, lat]));
+}
+
+function failure(error) {
+    console.log(error.message);
+}
+});
+**/
+
+//var mymap = L.map('mapid').setView([46.136, -60.1942], 13);
+var mymap = L.map('mapid').setView([  {{lat}} , -{{lng}}  ], 13);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+}).addTo(mymap);
+
+var marker = L.marker([44.682, -63.7443]).addTo(mymap);
+marker.bindPopup("<b>{{ url_text }}</b>");
+
+var popup = L.popup();
+
+var polyPoints = [];
+window.polygon = '';
+
+function onMapClick(e) {
+  //polyPoints.push([e.latlng.lat, e.latlng.lng]);
+
+  polyPoints.push(e.latlng);
+  popup
+    .setLatLng(e.latlng)
+    .setContent("Point #" + polyPoints.length + " at " + e.latlng.toString())
+    .openOn(mymap);
+
+  if (polyPoints.length > 2) {
+    if (polyPoints.length > 3) {
+      window.polygon.remove();
+    }
+    window.polygon = L.polygon(polyPoints).addTo(mymap);
+  }
+}
+
+mymap.on('click', onMapClick);
+
+});
+  </script>
+</body>
+
+</html>
