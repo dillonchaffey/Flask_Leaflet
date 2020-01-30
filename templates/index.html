@@ -75,6 +75,14 @@ window.polygon = '';
 function onMapClick(e) {
   //polyPoints.push([e.latlng.lat, e.latlng.lng]);
 
+  //use ajax instead
+	fetch('https://flaskleaflet.dillonchaffey.repl.co/api/' +e.latlng.lat+ '/' + e.latlng.lng)
+	.then(response => response.json())
+	.then(data => {
+	  console.log(data) // Prints result from `response.json()` in getRequest
+	})  
+  
+  
   polyPoints.push(e.latlng);
   popup
     .setLatLng(e.latlng)

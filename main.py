@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 app = Flask(__name__)
 
 test_data_array = []
@@ -7,9 +7,9 @@ test_data_array = []
 def index():
 	return render_template('index.html', lat=45, lng=65)
 
-'''
-@app.route('/api/<lat>/<lng>) 
-def coordinates():
+@app.route('/api/<lat>/<lng>') 
+def coordinates(lat,lng):
+  '''
   addresses = session.query(Coordinates)#however you query your db
   all_coods = [] # initialize a list to store your addresses
   for add in addresses:
@@ -18,8 +18,8 @@ def coordinates():
      "lng": add.lng, 
      "title": add.title}
      all_coods.append(address_details)
-  return jsonify({'cordinates': all_coods})
-'''
+  '''
+  return jsonify({'cordinates': [ lat, lng ]})
 
 @app.route('/<lat>/<lng>') 
 def display_map(lat, lng):
