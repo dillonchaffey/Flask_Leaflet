@@ -31,8 +31,14 @@
 
   <div id="mapid"></div>
 
+
   <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+
+  <base href=" {{  base_url  }} " />
+
   <script>
+
 
 
 $(document).ready(function () {
@@ -58,7 +64,7 @@ function failure(error) {
 **/
 
 //var mymap = L.map('mapid').setView([46.136, -60.1942], 13);
-var mymap = L.map('mapid').setView([  {{lat}} , -{{lng}}  ], 13);
+var mymap = L.map('mapid').setView([  {{ lat }} , -{{ lng }}  ], 13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
@@ -76,19 +82,27 @@ function onMapClick(e) {
   //polyPoints.push([e.latlng.lat, e.latlng.lng]);
 
   //use ajax instead
-	fetch('https://flaskleaflet.dillonchaffey.repl.co/api/' +e.latlng.lat+ '/' + e.latlng.lng)
+	fetch('api/' +e.latlng.lat+ '/' + e.latlng.lng)
 	.then(response => response.json())
 	.then(data => {
-	  console.log(data) // Prints result from `response.json()` in getRequest
-	})  
-  
-  
+	  console.dir(data)
+    popup
+      .setLatLng(e.latlng)
+      .setContent(
+      '<h3>Point #' + polyPoints.length + ' at ' + e.latlng.toString()+'</h3>' +
+      '<a href="' + data[1] + '">' + data[0] + '</a>'
+      )
+      .openOn(mymap);
+
+	})
+
   polyPoints.push(e.latlng);
+  /*
   popup
     .setLatLng(e.latlng)
-    .setContent("Point #" + polyPoints.length + " at " + e.latlng.toString())
+    .setContent("<h1>Point #" + polyPoints.length + " at " + e.latlng.toString()+"</h1>" + serverResponse)
     .openOn(mymap);
-
+  */
   if (polyPoints.length > 2) {
     if (polyPoints.length > 3) {
       window.polygon.remove();
