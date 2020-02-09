@@ -14,7 +14,7 @@ def display_home_page():
     server_base_url = request.base_url
     if '0.0.0.0' not in request.base_url and 'localhost' not in request.base_url:
         # print('not local')
-        server_base_url = request.base_url.replace('http', 'https')
+        server_base_url = request.base_url.replace('http://', 'https://')
 
     return render_template('index.html', lat=45, lng=65, base_url=server_base_url)
 
