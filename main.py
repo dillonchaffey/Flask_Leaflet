@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource, reqparse
 import requests
+from pprint import pprint
 
 # import pdb; pdb.set_trace()
 
@@ -12,7 +13,7 @@ api = Api(app)
 def display_home_page():
     server_base_url = request.base_url
     if '0.0.0.0' not in request.base_url and 'localhost' not in request.base_url:
-        print('not local')
+        # print('not local')
         server_base_url = request.base_url.replace('http', 'https')
 
     return render_template('index.html', lat=45, lng=65, base_url=server_base_url)
@@ -46,7 +47,7 @@ def coordinates(lat, lng):
         'http://api.geonames.org/findNearbyWikipedia?lat=' + lat + '&lng=' + lng + '&username=dillonchaffey')
 
 
-#    print(response.text)
+    # print(response.text)
     # import pdb; pdb.set_trace()
     # import xml.etree.ElementTree as ET
     # tree = ET.fromstring(response.text)
@@ -55,12 +56,24 @@ def coordinates(lat, lng):
     tree = ElementTree(fromstring(response.text))
     #print(response.text)
     # print(dir(tree))
-    root = tree.getroot()
-    #print(root[0][8].text)
-    return jsonify([
-        root[0][1].text,
-        root[0][8].text
+    geocodeResults = tree.getroot()
+    
+    #print(dir(root))
+
+    # pprint(globals())
+    # pprint(locals())
+    # pprint(type(geocodeResults[0]))      
+    # pprint(dir(geocodeResults[0]))  
+
+    returnArray = []
+    for geocodeResult in geocodeResults:
+        returnArray.append([
+        geocodeResult[1].text,
+        geocodeResult[8].text
     ])
+
+    pprint(returnArray)
+    return jsonify(returnArray)
 
 
 @app.route('/login')

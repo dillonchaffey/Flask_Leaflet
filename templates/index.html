@@ -35,7 +35,6 @@
   <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 
-  <base href=" {{  base_url  }} " />
 
   <script>
 
@@ -64,6 +63,9 @@ function failure(error) {
 **/
 
 //var mymap = L.map('mapid').setView([46.136, -60.1942], 13);
+
+var baseServerUrl = '{{  base_url  }}';
+
 var mymap = L.map('mapid').setView([  {{ lat }} , -{{ lng }}  ], 13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -82,16 +84,21 @@ function onMapClick(e) {
   //polyPoints.push([e.latlng.lat, e.latlng.lng]);
 
   //use ajax instead
-	fetch('api/' +e.latlng.lat+ '/' + e.latlng.lng)
+	fetch(baseServerUrl + 'api/' +e.latlng.lat+ '/' + e.latlng.lng)
 	.then(response => response.json())
-	.then(data => {
-	  console.dir(data)
+	.then(geocodeArray => {
+    console.dir(geocodeArray)
+
+    returnString = '';
+    for(i=0; i < geocodeArray.length; i++) {
+      returnString += 
+//      '<h3>Point #' + polyPoints.length + ' at ' + e.latlng.toString()+'</h3>' +
+      '<h'+(i+1)+'><a href="' + geocodeArray[i][1] + '">' + geocodeArray[i][0] + '</a>/<h'+(i+1)+'>'
+    }
+
     popup
       .setLatLng(e.latlng)
-      .setContent(
-      '<h3>Point #' + polyPoints.length + ' at ' + e.latlng.toString()+'</h3>' +
-      '<a href="' + data[1] + '">' + data[0] + '</a>'
-      )
+      .setContent(returnString)
       .openOn(mymap);
 
 	})
