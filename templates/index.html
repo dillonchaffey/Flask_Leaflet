@@ -65,7 +65,7 @@ function failure(error) {
 //var mymap = L.map('mapid').setView([46.136, -60.1942], 13);
 
 var baseServerUrl = '{{  base_url  }}';
-
+console.log(baseServerUrl);
 var mymap = L.map('mapid').setView([  {{ lat }} , -{{ lng }}  ], 13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
