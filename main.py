@@ -1,6 +1,10 @@
 from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource, reqparse
 import requests
+import json
+import geojson
+from geojson import Feature, Point, FeatureCollection
+
 from pprint import pprint
 
 # import pdb; pdb.set_trace()
@@ -20,50 +24,15 @@ def display_home_page():
 
 
 @app.route('/api/<lat>/<lng>')
-def coordinates(lat, lng):
-    '''
-    addresses = session.query(Coordinates)#however you query your db
-    all_coods = [] # initialize a list to store your addresses
-    for add in addresses:
-       address_details = {
-       "lat": add.lat,
-       "lng": add.lng,
-       "title": add.title}
-       all_coods.append(address_details)
-    '''
-    # return jsonify({'cordinates': [ lat, lng ]})
-    # g = geocoder.google([ lat, lng ], method='reverse', sensor=False)
-    # g2 = geocoder.google('Sydney, NS')
-    # print(g2)
-    # print(dir(g.response.raw))
-    # http://api.geonames.org/findNearbyWikipedia?lat=45&lng=-65&username=dillonchaffey
-    # http://api.geonames.org/findNearbyWikipedia?lat=44.860249404613604&lng=-65.02464294433595&username=dillonchaffey
-    # g = geocoder.geonames(location=[ lat, lng ], method='findNearbyWikipedia', lat=lat, lng=lng, key='dillonchaffey')
-
-    # g = geocoder.geonames('Sydney, NS', key='dillonchaffey')
-    # import pdb; pdb.set_trace()
-    print('http://api.geonames.org/findNearbyWikipedia?lat=' + lat + '&lng=' + lng + '&username=dillonchaffey')
+def get_nearby_wikipedia(lat, lng):
+    # print('http://api.geonames.org/findNearbyWikipedia?lat=' + lat + '&lng=' + lng + '&username=dillonchaffey')
     response = requests.get(
         'http://api.geonames.org/findNearbyWikipedia?lat=' + lat + '&lng=' + lng + '&username=dillonchaffey')
 
-
-    # print(response.text)
-    # import pdb; pdb.set_trace()
-    # import xml.etree.ElementTree as ET
-    # tree = ET.fromstring(response.text)
-
     from xml.etree.ElementTree import fromstring, ElementTree
     tree = ElementTree(fromstring(response.text))
-    #print(response.text)
-    # print(dir(tree))
-    geocodeResults = tree.getroot()
-    
-    #print(dir(root))
 
-    # pprint(globals())
-    # pprint(locals())
-    # pprint(type(geocodeResults[0]))      
-    # pprint(dir(geocodeResults[0]))  
+    geocodeResults = tree.getroot()
 
     returnArray = []
     for geocodeResult in geocodeResults:
@@ -72,68 +41,29 @@ def coordinates(lat, lng):
         geocodeResult[8].text
     ])
 
-    pprint(returnArray)
+   # pprint(returnArray)
     return jsonify(returnArray)
+
+
+@app.route('/api/buses')
+def get_buses():
+    # response = requests.get('https://kbus.doublemap.com/map/v2/buses');
+    # buses = json.loads(response.text)
+    buses = json.loads(
+        '[{"id":11,"name":"59","lat":45.0709,"lon":-64.54762,"heading":328,"route":66,"lastStop":1748,"fields":{},"bus_type":"bus","lastUpdate":1582415938}]')
+
+    outBuses = []
+    for b in buses:
+        outBuses.append(Feature(geometry=Point((b.get('lon'), b.get('lat')))))
+
+    print(geojson.dumps(FeatureCollection(outBuses)))
+    print(jsonify(FeatureCollection(outBuses)))
+    return jsonify(FeatureCollection(outBuses))
 
 
 @app.route('/login')
 def test_route():
-    return 'test!'
-
-
-class Position(Resource):
-    def get(self, name):
-        for position in positions:
-            if (name == position["name"]):
-                return position, 200
-        return "position not found", 404
-
-    def post(self, name):
-        parser = reqparse.RequestParser()
-        parser.add_argument("lat")
-        parser.add_argument("lng")
-        args = parser.parse_args()
-
-        for position in positions:
-            if (name == position["name"]):
-                return "position with name {} already exists".format(name), 400
-
-        position = {
-            "name": name,
-            "lat": args["lat"],
-            "lng": args["lng"]
-        }
-        positions.append(position)
-        return position, 201
-
-    def put(self, name):
-        parser = reqparse.RequestParser()
-        parser.add_argument("lat")
-        parser.add_argument("lng")
-        args = parser.parse_args()
-
-        for position in positions:
-            if (name == position["name"]):
-                position["lat"] = args["lat"]
-                position["lng"] = args["lng"]
-                return position, 200
-
-        position = {
-            "name": name,
-            "lat": args["lat"],
-            "lng": args["lng"]
-        }
-        positions.append(position)
-        return position, 201
-
-    def delete(self, name):
-        global positions
-        positions = [
-            position for position in positions if position["name"] != name]
-        return "{} is deleted.".format(name), 200
-
-
-api.add_resource(Position, "/position/<string:name>")
+    return jsonify({'test':1})
 
 
 @app.route('/<lat>/<lng>')
@@ -142,4 +72,4 @@ def display_map(lat, lng):
 
 
 if __name__ == '__main__':
-    app.run('0.0.0.0', 8080)
+    app.run('0.0.0.0', port='8080')

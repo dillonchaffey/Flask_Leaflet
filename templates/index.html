@@ -11,7 +11,7 @@
   <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
     integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
     crossorigin=""></script>
-  </script>
+
 
 </head>
 
@@ -42,28 +42,6 @@
 
 $(document).ready(function () {
 
-/**
-//  console.log("here")
-const geo = navigator.geolocation;
-geo.wifi.uri = 'https://location.services.mozilla.com/v1/geolocate?key=test'
-
-geo.getCurrentPosition(success, failure);
-
-function success(position) {
-    lat = position.coords.latitude;
-    lng = position.coords.longitude;
-    console.log(lat + ',' + lng);
-    //mapView.setCenter(ol.proj.fromLonLat([lng, lat]));
-}
-
-function failure(error) {
-    console.log(error.message);
-}
-});
-**/
-
-//var mymap = L.map('mapid').setView([46.136, -60.1942], 13);
-
 var baseServerUrl = '{{  base_url  }}';
 console.log(baseServerUrl);
 var mymap = L.map('mapid').setView([  {{ lat }} , -{{ lng }}  ], 13);
@@ -78,7 +56,8 @@ marker.bindPopup("<b>{{ url_text }}</b>");
 var popup = L.popup();
 
 var polyPoints = [];
-window.polygon = '';
+var polygon;
+var busMarkers;
 
 function onMapClick(e) {
   //polyPoints.push([e.latlng.lat, e.latlng.lng]);
@@ -87,41 +66,47 @@ function onMapClick(e) {
 	fetch(baseServerUrl + 'api/' +e.latlng.lat+ '/' + e.latlng.lng)
 	.then(response => response.json())
 	.then(geocodeArray => {
-    console.dir(geocodeArray)
+//    console.dir(geocodeArray)
 
-    returnString = '';
-    for(i=0; i < geocodeArray.length; i++) {
-      returnString += 
-//      '<h3>Point #' + polyPoints.length + ' at ' + e.latlng.toString()+'</h3>' +
-      '<h'+(i+1)+'><a href="' + geocodeArray[i][1] + '">' + geocodeArray[i][0] + '</a>/<h'+(i+1)+'>'
-    }
+        pString = '';
+        for(i=0; i < geocodeArray.length; i++) {
+          pString +=
+          '<h'+(i+1)+'><a href="' + geocodeArray[i][1] + '">' + geocodeArray[i][0] + '</a></h'+(i+1)+'>'
+        }
 
-    popup
-      .setLatLng(e.latlng)
-      .setContent(returnString)
-      .openOn(mymap);
+        popup
+          .setLatLng(e.latlng)
+          .setContent(pString)
+          .openOn(mymap);
 
 	})
 
   polyPoints.push(e.latlng);
-  /*
-  popup
-    .setLatLng(e.latlng)
-    .setContent("<h1>Point #" + polyPoints.length + " at " + e.latlng.toString()+"</h1>" + serverResponse)
-    .openOn(mymap);
-  */
+
   if (polyPoints.length > 2) {
     if (polyPoints.length > 3) {
-      window.polygon.remove();
+      polygon.remove();
     }
-    window.polygon = L.polygon(polyPoints).addTo(mymap);
+    polygon = L.polygon(polyPoints).addTo(mymap);
   }
 }
-
 mymap.on('click', onMapClick);
 
+setInterval(() => {
+    console.log('here');
+    fetch(baseServerUrl + 'api/buses')
+        .then(response => response.json())
+        .then(geoJsonBuses => {
+            if(busMarkers != undefined) mymap.removeLayer(busMarkers);
+            busMarkers = L.geoJSON(geoJsonBuses).addTo(mymap);
+        });
+
+}, 1000);
+
 });
+
   </script>
+
 </body>
 
 </html>
