@@ -43,15 +43,12 @@
 $(document).ready(function () {
 
 var baseServerUrl = '{{  base_url  }}';
-console.log(baseServerUrl);
-var mymap = L.map('mapid').setView([  {{ lat }} , -{{ lng }}  ], 13);
+//console.log(baseServerUrl);
+var mymap = L.map('mapid').setView([  {{ lat }} , -{{ lng }}  ], 11);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
 }).addTo(mymap);
-
-var marker = L.marker([44.682, -63.7443]).addTo(mymap);
-marker.bindPopup("<b>{{ url_text }}</b>");
 
 var popup = L.popup();
 
@@ -92,15 +89,23 @@ function onMapClick(e) {
 }
 mymap.on('click', onMapClick);
 
+var busIcon = L.icon({
+  iconUrl: 'static/bus_icon.png',
+  iconSize:     [50, 61],
+  iconAnchor:   [25, 61],
+});
+
 setInterval(() => {
-    console.log('here');
     fetch(baseServerUrl + 'api/buses')
         .then(response => response.json())
         .then(geoJsonBuses => {
             if(busMarkers != undefined) mymap.removeLayer(busMarkers);
-            busMarkers = L.geoJSON(geoJsonBuses).addTo(mymap);
+            busMarkers = L.geoJSON(geoJsonBuses, {
+              pointToLayer: function(feature, latlng) {
+                return L.marker(latlng, {icon: busIcon});
+              }
+            }).addTo(mymap);
         });
-
 }, 1000);
 
 });
